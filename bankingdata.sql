@@ -257,5 +257,80 @@ select * from kyc;
 
 delete from kyc;
 
+-- get all data for all customers 
 
+select * from customers;
+select firstname,email,phone from customers;
 
+select * from accounts;
+
+select customerID,balance from accounts
+where Balance > 40000;
+
+select accountid,accounttype,balance from accounts
+where AccountType = 'Savings';
+
+select * from customers
+where customerid = 104;
+
+-- Find all customers whose accounttype is savings and balance greater than 2000 
+SELECT 
+    *
+FROM
+    accounts
+WHERE
+    accounttype = 'Savings'
+        AND balance > 20000;
+
+SELECT 
+    *
+FROM
+    accounts
+WHERE
+    accounttype = 'Current'
+        OR balance > 20000;
+
+-- Find all accounts where account type is not savings 
+
+select * from loans
+where interestrate in (8.5,9.0);
+
+select * from loans
+where InterestRate between 7.5 and 8.5;
+
+-- find all customers having balance between 40k to 60k
+select * from accounts
+where balance between 20000 and 60000; 
+
+-- find all customers having balance between 40k to 60k
+-- and account type is current
+select * from accounts
+where balance between 20000 and 60000 AND accounttype ='Current'; 
+
+select * from customers;
+
+-- Like operator
+select * from customers
+where  lastname LIKE 'J%';
+
+select * from customers
+where  firstname LIKE '%a';
+
+select * from customers
+where  firstname LIKE 'P___';
+
+SELECT *
+FROM Customers
+WHERE CustomerID IN (101,102,103);
+
+select * from accounts;
+
+-- Sort accounts table as per balance in descending order
+select * from accounts
+order by balance DESC;
+
+select * from accounts
+order by balance;
+
+select * from accounts
+order by balance DESC,accounttype DESC;
