@@ -532,5 +532,100 @@ select power(1.5,3);
 select sqrt(123);
 select sqrt(144);  
 
+-- Date Function
+select * from customers;
+select now();
+select current_date();
+select curdate();
 
+select year(dateofbirth),month(dateofbirth),day(dateofbirth) from customers;
 
+select customerid,FirstName,dateofbirth,
+year(dateofbirth),month(dateofbirth),day(dateofbirth)
+from customers where customerid = 104;
+
+select customerid,FirstName,dateofbirth,
+year(curdate()) - year(dateofbirth) as age
+from customers;
+
+select * from customers;
+
+select firstname, dateofbirth, datediff(curdate(),dateofbirth)
+from customers;
+
+select firstname, dateofbirth, round(datediff(curdate(),dateofbirth) / 365, 1) as age
+from customers;
+
+select firstname, dateofbirth,
+       concat(firstname, " age is ", round(datediff(curdate(), dateofbirth) / 365, 1)) as age
+       
+from customers;select firstname, dateofbirth,
+        round(datediff(curdate(), dateofbirth) / 365, 1) as age
+from customers;
+
+select concat(firstname," ",lastname) as fullname,
+accountcreationdate,
+date_add(accountcreationdate, interval 1 year) as KYCRenewal
+from customers;
+
+UPDATE customers SET DateofBirth = '1998-05-10', AccountCreationDate = '2024-01-15' WHERE customerID = 101;
+UPDATE customers SET DateofBirth = '2000-01-05', AccountCreationDate = '2024-04-18' WHERE customerID = 104;
+UPDATE customers SET DateofBirth = '1996-12-30', AccountCreationDate = '2024-05-25' WHERE customerID = 105;
+
+select date_sub(curdate(), interval 7 day);
+
+UPDATE customers c
+JOIN (SELECT customerID, DateofBirth AS dob, AccountCreationDate AS acd
+      FROM customers
+      WHERE customerID IN (101,104,105)) t
+  ON c.customerID = t.customerID
+SET c.DateofBirth = t.acd,
+    c.AccountCreationDate = t.dob;
+    
+-- Aggregrate Function
+
+-- Calculate the total balance maintained across all customer accounts
+select sum(balance) totalBalance from accounts;
+
+-- Calculate the Average balance maintained across all customer account
+select avg(balance) AverageBalance from accounts;
+
+-- Identify the highest balance maintained in any customer account
+select max(balance) as highest_balance
+from accounts;
+
+-- Determine the total number of customer accounts available in the system.
+select count(*) as NoofAccounts from accounts;
+
+select * from accounts;
+
+-- Group By 
+SELECT 
+    accounttype, COUNT(*) as NoOfAccounts
+FROM
+    accounts
+GROUP BY accounttype;
+
+SELECT 
+    accounttype, sum(balance) as NoOfAccounts
+FROM
+    accounts
+GROUP BY accounttype;
+
+-- Find total amount by transaction type 
+select TransationType, sum(Ammount) as TotalAmount
+from transactions
+group by TransationType;
+
+select customerID, firstname, DateofBirth, AccountCreationDate
+from customers
+where customerID = 105;
+
+update customers
+set DateofBirth = '1996-12-30',
+    AccountCreationDate = '2024-05-25'
+where customerID = 105;
+
+select customerID, firstname, DateofBirth, AccountCreationDate
+from customers
+where customerID in (101, 104, 105);
