@@ -629,3 +629,58 @@ where customerID = 105;
 select customerID, firstname, DateofBirth, AccountCreationDate
 from customers
 where customerID in (101, 104, 105);
+
+ALTER TABLE transactions RENAME COLUMN TransationType TO TransactionType;
+ALTER TABLE transactions RENAME COLUMN Ammount TO Amount;
+ALTER TABLE kyc RENAME COLUMN Adhar_num TO Aadhaar_num;
+
+-- Find total accounts for branch and accounttype.
+select * from accounts;
+
+select AccountType, BranchID, count(*) as NoofAccounts
+from accounts
+group by AccountType, BranchID
+order by NoofAccounts desc;
+
+-- HAVING Clause
+-- Find Transaction type where total amount for that transaction type exceeds 20000.
+ select TransactionType, sum(Amount) as TotalAmount
+from transactions
+group by TransactionType
+having TotalAmount > 20000;
+
+select TransactionType, sum(Amount) as TotalAmount
+from transactions
+group by TransactionType
+having TotalAmount > 20000 and TransactionType = 'Deposit';
+
+-- Find number for customers for according to year from customers table 
+select * from customers;
+
+select year(accountcreationdate) as years, count(*) as totalCustomers
+from customers
+group by years
+order by totalcustomers desc;
+
+-- Find total loan amount for all the customers.
+select * from loans;
+
+select CustomerID, sum(LoanAmount) as TotalLoanAmount
+from loans
+group by CustomerID
+order by CustomerID;
+
+-- Display distinct BranchIDs from Accounts where balance is greater than rupees 30000.
+select * from accounts;
+
+select branchid, balance
+from accounts
+where balance > 30000
+order by BranchID;
+
+-- Display all savings accounts belonging to branch 1 or branch 3. 
+select * from accounts
+where BranchID = 1 or BranchID = 3
+and AccountType = 'Savings';
+
+
