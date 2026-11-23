@@ -116,6 +116,8 @@ desc loans;
 alter table loans
 change Enddtae EndDate date;
 
+alter table loans change Enddate EndDate date;
+
 alter table customers
 modify phone varchar(20);
 
@@ -402,7 +404,7 @@ select distinct customerid from loans;
 select * from transactions
 limit 5;
 
-select * from transactions;
+select * from transactions
 order by Ammount desc
 limit 3;
 
@@ -568,19 +570,7 @@ accountcreationdate,
 date_add(accountcreationdate, interval 1 year) as KYCRenewal
 from customers;
 
-UPDATE customers SET DateofBirth = '1998-05-10', AccountCreationDate = '2024-01-15' WHERE customerID = 101;
-UPDATE customers SET DateofBirth = '2000-01-05', AccountCreationDate = '2024-04-18' WHERE customerID = 104;
-UPDATE customers SET DateofBirth = '1996-12-30', AccountCreationDate = '2024-05-25' WHERE customerID = 105;
-
 select date_sub(curdate(), interval 7 day);
-
-UPDATE customers c
-JOIN (SELECT customerID, DateofBirth AS dob, AccountCreationDate AS acd
-      FROM customers
-      WHERE customerID IN (101,104,105)) t
-  ON c.customerID = t.customerID
-SET c.DateofBirth = t.acd,
-    c.AccountCreationDate = t.dob;
     
 -- Aggregrate Function
 
@@ -613,26 +603,9 @@ FROM
 GROUP BY accounttype;
 
 -- Find total amount by transaction type 
-select TransationType, sum(Ammount) as TotalAmount
+select TransactionType, sum(Amount) as TotalAmount
 from transactions
-group by TransationType;
-
-select customerID, firstname, DateofBirth, AccountCreationDate
-from customers
-where customerID = 105;
-
-update customers
-set DateofBirth = '1996-12-30',
-    AccountCreationDate = '2024-05-25'
-where customerID = 105;
-
-select customerID, firstname, DateofBirth, AccountCreationDate
-from customers
-where customerID in (101, 104, 105);
-
-ALTER TABLE transactions RENAME COLUMN TransationType TO TransactionType;
-ALTER TABLE transactions RENAME COLUMN Ammount TO Amount;
-ALTER TABLE kyc RENAME COLUMN Adhar_num TO Aadhaar_num;
+group by TransactionType;
 
 -- Find total accounts for branch and accounttype.
 select * from accounts;
@@ -682,5 +655,287 @@ order by BranchID;
 select * from accounts
 where BranchID = 1 or BranchID = 3
 and AccountType = 'Savings';
+
+-- Find the average balance of current accounts for each branch displays only banches where the average balance exceeds rupess 40000
+
+select branchid,accounttype, avg(balance) as avgBalance from accounts
+where accounttype = "Current"
+group by branchid;
+
+select * from customers;
+select * from accounts;
+select * from loans;
+
+-- Joins
+-- A Join combines related rows from different tables based on a common column
+
+-- 1. Inner Join
+-- Matches rows that exists in both tables.
+
+-- Find all customers who have accounts and show their balance.
+SELECT 
+    c.customerID,
+    c.firstname,
+    c.lastname,
+    a.accounttype,
+    a.balance
+FROM
+    customers c
+        INNER JOIN
+    accounts a ON c.customerID = a.CustomerID;
+    
+SELECT 
+    *
+FROM
+    customers c
+        INNER JOIN
+    accounts a ON c.customerID = a.CustomerID;
+    
+-- Find all the customer who have loans output should contain customerid,firstname, lastname,phone, loanamount 
+select c.customerID, c.firstname, c.lastname, c.phone, l.LoanAmount
+from customers c
+inner join loans l on c.customerID = l.CustomerID;
+
+select c.customerID, c.firstname, c.lastname, c.phone, l.LoanAmount
+from customers c
+join loans l # By default mysql uses inner join if join type is not mentioned
+on c.customerID = l.CustomerID;
+
+UPDATE customers SET DateofBirth = '1998-05-10', AccountCreationDate = '2024-01-15' WHERE customerID = 101;
+UPDATE customers SET DateofBirth = '2000-01-05', AccountCreationDate = '2024-04-18' WHERE customerID = 104;
+UPDATE customers SET DateofBirth = '1996-12-30', AccountCreationDate = '2024-05-25' WHERE customerID = 105;
+
+UPDATE customers c
+JOIN (SELECT customerID, DateofBirth AS dob, AccountCreationDate AS acd
+      FROM customers
+      WHERE customerID IN (101,104,105)) t
+  ON c.customerID = t.customerID
+SET c.DateofBirth = t.acd,
+    c.AccountCreationDate = t.dob;
+    
+select customerID, firstname, DateofBirth, AccountCreationDate
+from customers
+where customerID = 105;
+
+update customers
+set DateofBirth = '1996-12-30',
+    AccountCreationDate = '2024-05-25'
+where customerID = 105;
+
+select customerID, firstname, DateofBirth, AccountCreationDate
+from customers
+where customerID in (101, 104, 105);
+
+ALTER TABLE transactions RENAME COLUMN TransationType TO TransactionType;
+ALTER TABLE kyc RENAME COLUMN Adhar_num TO Aadhaar_num;
+ALTER TABLE transactions RENAME COLUMN Ammount TO Amount;
+
+select *  from branches;
+
+-- get CustomerID, customer name, account type, balance, branch name for realated tables 
+select c.customerID,
+       concat_ws(' ', c.firstname, c.lastname) as CustomerName,
+       a.AccountType,
+       a.balance,
+       b.BranchName
+from customers c
+join accounts a on c.customerID = a.CustomerID
+join branches b on a.BranchID = b.BranchID
+order by c.customerID;
+
+-- Find the number of accounts held by each customers
+-- Left Join
+-- Returns all rows from the left table, and matched rows from the right
+-- Get data for all customers and show their balance
+select c.CustomerID, C.firstname, c.lastname, a.accounttype, a.balance
+from customers c
+left join accounts a
+on c.customerID = a.CustomerID;
+
+-- Find cusotmers who are registered but dont have account
+select c.CustomerID, C.firstname, c.lastname, a.accounttype, a.balance
+from customers c
+left join accounts a
+on c.customerID = a.CustomerID
+where a.accounttype is Null and a.balance is Null;
+
+-- Right Join
+select c.CustomerID, C.firstname, c.lastname, a.accounttype, a.balance
+from customers c
+right join accounts a
+on c.customerID = a.CustomerID;
+
+-- Full outer join
+select * from customers c
+left join accounts a
+on c.customerID = a.CustomerID
+union
+select * from customers c
+right join accounts a
+on c.CustomerID = a.CustomerId;
+
+-- Cross Join 
+select * from customers c
+cross join accounts a;
+
+-- Find the number of accounts held by each customers
+select c.customerID,
+       concat_ws(' ', c.firstname, c.lastname) as CustomerName,
+       count(a.AccountID) as NoOfAccounts
+from customers c
+left join accounts a on c.customerID = a.CustomerID
+group by c.customerID, c.firstname, c.lastname
+order by c.customerID;
+
+select c.customerID, c.firstname, c.lastname, count(a.accounttype) as NoOfAccounts
+from customers c
+left join accounts a on c.customerID = a.CustomerID
+group by c.customerID;
+
+-- Find the numbers of customers for each accounts type. 
+select a.AccountType, count(a.customerID) as NoOfCustomers
+from accounts a
+left join customers c on a.CustomerID = c.customerID
+group by a.AccountType;
+
+select accounttype, count(*)
+from accounts
+group by accounttype;
+
+-- Find customers who have more than one accounts
+select c.customerID, c.firstname, c.lastname, count(a.accounttype) as NoOfAccounts
+from customers c
+left join accounts a on c.customerID = a.CustomerID
+group by c.customerID
+having NoofAccounts > 1;
+
+-- Find the customers who have never performed a transaction.
+SELECT 
+    c.customerID,
+    c.firstname,
+    c.lastname,
+    a.accountid,
+    t.TransactionID
+FROM
+    customers c
+        JOIN
+    accounts a ON c.customerID = a.CustomerID
+        LEFT JOIN
+    transactions t ON a.AccountID = t.AccountID
+WHERE
+    t.TransactionID IS NULL;
+    
+    -- Self Join
+-- Not a keyword - just a regular join where a table is joined to itself, using two aliases. perfect for hierarchies: here, matching each employee to their manager who is also an employee.
+create table Employees (
+  EmployeeID INT primary key,
+  EmployeeName varchar(50) not null,
+  ManagerID int,
+  Department varchar(50),
+  Salary decimal(10,2),
+  JoiningDate date,
+  BranchID int,
+  foreign key (ManagerID)
+  references Employees(EmployeeID),
+  foreign key (BranchID)
+  references Branches(BranchID)
+  );
+  desc employees;
+  
+  select * from employees;
+INSERT INTO Employees
+    (EmployeeID, EmployeeName, ManagerID, Department, Salary, JoiningDate, BranchID)
+VALUES
+    (1, 'Rajesh Sharma', NULL, 'Management', 120000.00, '2018-04-15', 1),
+    (2, 'Priya Patel', 1, 'Human Resources', 75000.00, '2019-06-10', 2),
+    (3, 'Amit Kumar', 1, 'Finance', 82000.00, '2020-01-20', 3),
+    (4, 'Sneha Verma', 1, 'IT', 95000.00, '2019-09-05', 4),
+    (5, 'Rahul Singh', 1, 'Sales', 78000.00, '2021-03-12', 5),
+
+    (6, 'Neha Joshi', 2, 'Human Resources', 55000.00, '2021-07-19', 1),
+    (7, 'Vikas Gupta', 2, 'Human Resources', 52000.00, '2022-02-14', 2),
+    (8, 'Pooja Mehta', 3, 'Finance', 60000.00, '2021-11-08', 3),
+    (9, 'Suresh Yadav', 3, 'Finance', 58000.00, '2022-05-16', 4),
+    (10, 'Anjali Deshmukh', 4, 'IT', 72000.00, '2020-08-24', 5),
+
+    (11, 'Rohan Kulkarni', 4, 'IT', 68000.00, '2021-10-11', 1),
+    (12, 'Kavita Rao', 4, 'IT', 65000.00, '2022-01-17', 2),
+    (13, 'Arjun Malhotra', 5, 'Sales', 57000.00, '2022-06-20', 3),
+    (14, 'Meena Shah', 5, 'Sales', 59000.00, '2021-12-06', 4),
+    (15, 'Deepak Thakur', 5, 'Sales', 54000.00, '2023-01-09', 5),
+
+    (16, 'Nitin Pawar', 6, 'Human Resources', 42000.00, '2023-04-18', 1),
+    (17, 'Swati Mishra', 7, 'Human Resources', 40000.00, '2023-07-03', 2),
+    (18, 'Manish Jain', 8, 'Finance', 45000.00, '2023-02-27', 3),
+    (19, 'Komal Sinha', 9, 'Finance', 43000.00, '2023-08-14', 4),
+    (20, 'Akash Bansal', 10, 'IT', 50000.00, '2023-05-22', 5);
+    
+
+SELECT e.EmployeeID, e.EmployeeName as EmployeeName, m.EmployeeName as ManagerName
+FROM Employees e
+LEFT JOIN Employees m
+ON e.ManagerID = m.EmployeeID;
+
+-- Include branch name also
+SELECT e.EmployeeID, e.EmployeeName as EmployeeName, m.EmployeeName as ManagerName,
+b.branchname
+FROM Employees e
+LEFT JOIN Employees m
+ON e.ManagerID = m.EmployeeID
+join branches b
+on e.branchid = b.branchid
+order by e.EmployeeID;
+
+-- Find the all the employees who report to sneha verma 
+SELECT e.EmployeeID,
+       e.EmployeeName AS EmployeeName,
+       m.EmployeeName AS ManagerName
+FROM Employees e
+JOIN Employees m
+  ON e.ManagerID = m.EmployeeID
+JOIN Branches b
+  ON e.BranchID = b.BranchID
+WHERE m.EmployeeName = 'Sneha Verma'
+ORDER BY e.EmployeeID;
+
+-- find Employee who does not have any manager
+SELECT e.EmployeeID,
+       e.EmployeeName AS EmployeeName,
+       m.EmployeeName AS ManagerName
+FROM Employees e
+LEFT JOIN Employees m
+  ON e.ManagerID = m.EmployeeID
+where m.employeename is null;
+
+-- Subqueries
+-- Find all customers having balance more than the average balance
+select * from accounts;
+select avg(balance) from accounts;
+SELECT customerid, balance, accounttype from accounts
+where balance >40642;
+
+select accountid, customerid, balance, accounttype
+from accounts
+where balance >(
+select avg(balance) from accounts
+);
+
+-- Find all customers having balance more than the average balance in the savings account
+select avg(balance) from accounts
+where accounttype="Savings";
+
+SELECT c.firstname, a.balance
+FROM Customers c
+JOIN Accounts a
+  ON c.CustomerID = a.CustomerID
+WHERE a.AccountType = 'Savings';
+  
+-- Scalar Subquery
+--  A scalar subquery returns exactly on row and one colume
+select * from accounts;
+select customerid, accountid, accounttype, balance
+from accounts
+where balance > (select avg(balance) from accounts where accounttype = "Savings")
+&& AccountType = "Savings";
 
 
