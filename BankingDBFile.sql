@@ -938,4 +938,89 @@ from accounts
 where balance > (select avg(balance) from accounts where accounttype = "Savings")
 && AccountType = "Savings";
 
+-- Find the account(S) having the highest balance.
+select customerid, accounttype, balance
+from accounts
+where balance = (select max(balance) from accounts);
+
+-- Find customers whose year of birth is earlier than the average year of birth of all customers.
+select customerID, firstname, lastname, DateofBirth
+from customers
+where year(DateofBirth) < (select avg(year(DateofBirth)) from customers);
+
+-- Multiple Row suquery
+-- A multiple row subqery returns more than one row, usually a single column.
+
+-- Find all customers who have taken at least one loan
+select c.customerID, c.firstname, c.lastname, l.loanamount
+from customers c
+inner join loans l on c.customerID = l.CustomerID;
+
+select customerID, firstname, lastname
+from customers
+where customerID in (select CustomerID from loans);
+
+-- find all customers who have at least one savings account 
+SELECT 
+    customerID, firstname, lastname
+FROM
+    customers
+WHERE
+    customerID IN (SELECT 
+            CustomerID
+        FROM
+            accounts
+        WHERE
+            AccountType = 'Savings');
+            
+select * from accounts;
+-- update customer id to 114 where
+update accounts set customerid = 114
+where accountid = 1014;
+
+-- update account type of account id 1009 to current 
+update accounts
+set AccountType = 'Current'
+where AccountID = 1009;
+
+-- update balance to 0 for account id 1008
+update accounts
+set balance = 1100
+where AccountID = 1008;
+
+-- update branchid to 5 for accountid 1012
+update accounts
+set BranchID = 5
+where AccountID = 1012;
+
+select * from branches;
+select * from customers;
+
+-- add account creation date for customerid 109
+update customers
+set AccountCreationDate = '2025-02-20'
+where customerID = 109;
+
+select * from loans;
+update loans set loanamount = 200000
+where loanid = 507;
+
+update loans set customerid = 104
+where loanid = 509;
+
+select * from transactions;
+update transactions set amount = 6500
+where transactionid = 7;
+
+update transactions set transactiontype = 'Withdrawal'
+where transactionid = 10;
+
+update transactions set accountid = 1006
+where transactionid = 13;
+
+-- find all customers who have an account in branchid = 1
+select customerID, firstname, lastname
+from customers
+where customerID in (select CustomerID from accounts where BranchID = 1);
+
 
